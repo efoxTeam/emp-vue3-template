@@ -86,15 +86,18 @@ return args
 
 5. 同步类型文件
 
-+  通过配置scripts手动更新（emp tss https://你的项目地址/index.d.ts -n @emp-react-base.d.ts）
-+ [安装vscode插件 emp-sync-base自动同步](https://marketplace.visualstudio.com/items?itemName=Benny.emp-sync-base)
-
+*  通过配置scripts手动更新（emp tss https://你的项目地址/index.d.ts -n @emp-react-base.d.ts）
+* [安装vscode插件 emp-sync-base自动同步](https://marketplace.visualstudio.com/items?itemName=Benny.emp-sync-base)
 
 4. 使用基站组件（远程组件）
 
 main.js
-```js
-import {createApp, defineAsyncComponent} from 'vue'
+
+``` js
+import {
+    createApp,
+    defineAsyncComponent
+} from 'vue'
 import Layout from './Layout.vue'
 
 const Button = defineAsyncComponent(() => import('vue3Components/Button'))
@@ -104,24 +107,39 @@ const app = createApp(Layout)
 app.component('button-element', Button)
 
 app.mount('#emp-root')
-
 ```
 
 Layout.vue
-```js
 
+``` js
 <template>
-<div>
-  <h1>EMP vue3 Components 调用远程组件</h1>
-  <div>
-        <h2>远程元素 Button.js</h2>
-        <button-element />
+  <div class="layout-app">
+    <img src="../logo.png" width="30" />
+    <h1>EMP Vue3 Hello</h1>
   </div>
-</div>
 </template>
 
-```
+<script>
+import { ref } from "vue";
+export default {
+  setup() {},
+  data() {
+    return {};
+  },
+};
+</script>
 
+<style scoped>
+img {
+  width: 200px;
+}
+
+.layout-app {
+  text-align: center;
+  padding: 10px;
+}
+</style>
+```
 
 ## 依赖库 package.json
 
@@ -137,86 +155,62 @@ Layout.vue
 ```
 
 ## 微前端配置 emp-config.js
-
-``` javascript
+```js
+const withVue3 = require('@efox/emp-vue3')
 const path = require('path')
-const {
-    VueLoaderPlugin
-} = require('vue-loader')
-//
 const ProjectRootPath = path.resolve('./')
-// const packagePath = path.join(ProjectRootPath, 'package.json')
-// const {dependencies} = require(packagePath)
-//
-const {
-    getConfig
-} = require(path.join(ProjectRootPath, './src/config'))
-//
-module.exports = ({
-    config,
-    env,
-    empEnv
-}) => {
-    const confEnv = env === 'production' ? 'prod' : 'dev'
-    const conf = getConfig(empEnv || confEnv)
-    // config.entry('web')
-    const srcPath = path.resolve('./src')
-    config.entry('index').clear().add(path.join(srcPath, 'main.js'))
-    // vue 3 编译构建
-    config.resolve.alias.set('vue', '@vue/runtime-dom')
-    config.plugin('vue3').use(VueLoaderPlugin, [])
-    config.module
+const { getConfig } = require(path.join(ProjectRootPath, './src/config'))
+module.exports = withVue3(({ config, env, empEnv }) => {
+  const confEnv = env === 'production' ? 'prod' : 'dev'
+  const conf = getConfig(empEnv || confEnv)
+  const port = conf.port
+  const projectName = 'vue3Template'
+  const publicPath = conf.publicPath
+  // 设置项目URL
+  config.output.publicPath(publicPath)
+  // 设置项目端口
+  config.devServer.port(port)
+  config.plugin('mf').tap(args => {
 
-        .rule('vue')
-        .test(/\.vue$/)
-        .use('vue-loader')
-        .loader('vue-loader')
+    args[0] = {
+      ...args[0],
+      ...{
+        // 项目名称
+        name: projectName,
+        // 暴露项目的全局变量名
+        library: { type: 'var', name: projectName },
+        // 被远程引入的文件名
+        filename: 'emp.js',
+        remotes: {
+          // 远程项目别名:远程引入的项目名
+        },
+        // 需要暴露的东西
+        exposes: {
+          // 别名:组件的路径
+        },
+        // 需要共享的依赖
+        shared: [],
+      },
+    }
+    return args
 
-    //
-    const host = conf.host
-    const port = conf.port
-    const projectName = 'vue3Base'
-    const publicPath = conf.publicPath
-    config.output.publicPath(publicPath)
-    config.devServer.port(port)
-    //
-    config.plugin('mf').tap(args => {
+  })
+  // 配置 index.html
+  config.plugin('html').tap(args => {
 
-        args[0] = {
-            ...args[0],
-            ...{
-                name: projectName,
-                library: {
-                    type: 'var',
-                    name: projectName
-                },
-                filename: 'emp.js',
-                remotes: {
-                    vue3Components: 'vue3Components',
-                },
-                exposes: {},
-                /*  shared: {
-                  ...dependencies,
-                }, */
-            },
-        }
-        return args
+    args[0] = {
+      ...args[0],
+      ...{
+        // head 的 title
+        title: 'EMP Vue3 Template',
+        // 远程调用项目的文件链接
+        files: {
+        },
+      },
+    }
+    return args
 
-    })
-    //
-    config.plugin('html').tap(args => {
+  })
+})
 
-        args[0] = {
-            ...args[0],
-            ...{
-                title: 'EMP Vue3 Base',
-                files: {
-                    js: [conf.baseRemoteEntry],
-                },
-            },
-        }
-        return args
-
-    })
-}
 ```

@@ -3,17 +3,11 @@ const dev = {
   host: "localhost",
   port: 8005,
   publicPath: "http://localhost:8005/",
-  // 远程基站地址
-  // baseRemote: 'http://localhost:8006',
-  // baseRemoteEntry: `http://localhost:8006/emp.js`,
 };
 const prod = {
   host: "localhost",
   port: 8005,
   publicPath: "http://localhost:8005/",
-  // 远程基站地址
-  // baseRemote: 'http://localhost:8006',
-  // baseRemoteEntry: `http://localhost:8006/emp.js`,
 };
 const configs = { dev, prod };
 exports.getConfig = (env) => {
