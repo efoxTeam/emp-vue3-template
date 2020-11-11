@@ -145,12 +145,13 @@ img {
 
 ``` json
   "devDependencies": {
-    "@efox/emp-cli": "^1.1.17",
-    "@vue/compiler-sfc": "^3.0.0-rc.10",
-    "vue-loader": "^16.0.0-beta.5"
+    "@efox/emp-cli": "^1.2.9",
+    "@efox/emp-vue3": "^1.0.1",
+    "@vue/compiler-sfc": "^3.0.2",
+    "vue-loader": "^16.0.0-rc.1"
   },
   "dependencies": {
-    "vue": "^3.0.0-rc.10"
+    "vue": "^3.0.2"
   },
 ```
 
